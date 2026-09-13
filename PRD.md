@@ -4,7 +4,7 @@
 
 **Author:** Akhil  
 **Date:** September 2026  
-**Status:** Backend complete and verified · Frontend in progress  
+**Status:** Complete — backend and frontend built and verified  
 
 ---
 
@@ -49,7 +49,7 @@ The brief for this assignment was intentionally open-ended. Here's what was assu
 - **The assistant is pre-loaded with Lenny's Podcast, not a general file-upload tool.** A user should never need to upload a transcript — the corpus is ingested once, ahead of time. This was a deliberate choice: it allows retrieval to be tuned specifically for this dataset (guest names, speaker turns, podcast intros as noise) instead of building a generic ingestion pipeline that has to handle arbitrary transcript quality.
 - **Local model support (Ollama) is treated as a hard requirement, not an optional extra**, per the brief — the app needs to run and demo without requiring anyone's personal API key.
 - **A cloud provider option exists mainly to prove the system is configurable**, not because it's expected to be the primary way the app is evaluated.
-- **Given the short timeline, some infrastructure ideas were deliberately cut.** An early draft plan included things like a second database fallback path and a more complex hybrid search setup. These were dropped in favor of spending the available time making the core retrieval and grounding genuinely reliable, rather than technically impressive but shallow.
+- **Given the short timeline, some infrastructure ideas were reconsidered along the way.** An early draft plan proposed a more complex hybrid search setup (BM25 plus dense embeddings) up front; this was simplified to a tuned lexical/topical retrieval approach so time could go toward making grounding genuinely reliable rather than technically elaborate. Database resilience (automatic fallback to local SQLite when PostgreSQL isn't configured) was kept, since it directly serves the "zero-friction evaluation" goal and required little extra effort once the async database layer was in place.
 
 ### On reusing prior work
 There was an earlier personal project — a summarization model trained on 300k+ CNN/DailyMail news articles. It was considered and explicitly ruled out as the core engine here: it's a different task (fixed-length summarization vs. multi-turn grounded retrieval) on a completely different and unrelated dataset. It has no ability to cite a specific guest or episode. It's mentioned here only for transparency, not because it contributed to this system.
@@ -73,26 +73,36 @@ There was an earlier personal project — a summarization model trained on 300k+
 - Because this HTML is AI-generated, it's rendered inside a sandboxed iframe that cannot access the rest of the page, cookies, or local storage — a defensive measure against any unexpected or malicious content.
 
 ### 5.4 Configurable model provider
-- The active LLM (Ollama locally, or Claude/OpenAI in the cloud) is set through configuration, not code.
-- The system reports honestly which provider is active and whether it's currently reachable.
+- The active LLM — Groq (cloud, recommended for evaluators since it's free and requires no local setup), Ollama (local, required for the offline demo), Anthropic Claude, or OpenAI — is set via a single `.env` value, with no code changes needed.
+- Providers can also be switched at runtime through a dedicated endpoint (`/api/models/switch`), without restarting the server.
+- The system reports honestly which provider is active and whether it's currently reachable, via `/api/health`.
 
 ### 5.5 Persistence
 - Conversations, sessions, and generated artifacts are saved so that a user can leave and return to a conversation without losing it.
 - Sessions are isolated from one another.
+
+### 5.6 Frontend / User Interface
+Built in React. The interface includes:
+- A visually distinct landing/chat surface using a glassmorphism-style canvas with a 3D animated hero element.
+- A chat window that renders streamed responses progressively, rather than waiting for the full answer before showing anything, with autoscroll.
+- Inline display of source citations (guest, episode, timestamp) alongside grounded answers.
+- A side-by-side artifact viewer panel for generated documents/checklists, separate from the main chat.
+- A live, pill-shaped indicator showing the active model/provider, with the ability to switch it directly from the UI.
+- A session sidebar showing past conversations, so a user can return to an earlier chat.
 
 ---
 
 ## 6. System Architecture (Summary)
 
 ```
-Browser (chat UI + artifact viewer)
+Browser (React frontend — chat UI + artifact viewer + session sidebar)
         │
         ▼
 FastAPI backend
    ├── Agent orchestration (decides: plain answer / essay / artifact)
    ├── Retrieval layer (searches indexed transcript chunks)
-   ├── LLM provider layer (Ollama locally, or Claude/OpenAI in the cloud)
-   └── Persistence layer (PostgreSQL)
+   ├── LLM provider layer (Groq / Ollama / Claude / OpenAI, runtime-switchable)
+   └── Persistence layer (PostgreSQL, with automatic SQLite fallback for local evaluation)
         │
         ▼
 Ollama (runs natively on the host machine, outside Docker)
@@ -128,9 +138,9 @@ Each of these was caught through direct manual testing, not assumed to be fine.
 
 | Risk | Mitigation / Current State |
 |---|---|
-| Local model responses are slow (60s+ for a full essay) | Addressed with streaming so the experience doesn't feel frozen; documented as an inherent trade-off of the local-model requirement |
+| Local model responses are slow (60s+ for a full essay) | Addressed with streaming so the experience doesn't feel frozen; Groq is offered as a fast, free cloud alternative for evaluators who don't want to wait on local inference, while Ollama remains the required path for the offline demo |
 | Retrieval could still surface tangential quotes on some queries | Chunking and scoring were tuned to reduce this, but it isn't perfect on every query |
-| Cloud provider path is implemented but only lightly tested | Verified with a real API key for basic generation; not as heavily stress-tested as the Ollama path, since Ollama is the required path for the demo |
+| Multiple cloud providers add surface area to maintain | Groq and Anthropic were both verified with real API keys; OpenAI is wired to the same interface but tested less extensively |
 | A generic offline fallback exists for reliability | Used only to keep automated tests stable without external dependencies — never used for real user-facing answers |
 
 ---
