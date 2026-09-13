@@ -1,0 +1,25 @@
+# venture capital
+
+Episodes discussing **venture capital**:
+
+- [Andrew Wilkinson](../episodes/andrew-wilkinson/transcript.md)
+- [Annie Duke](../episodes/annie-duke/transcript.md)
+- [Ben Horowitz](../episodes/ben-horowitz/transcript.md)
+- [Edwin Chen](../episodes/edwin-chen/transcript.md)
+- [Eric Simons](../episodes/eric-simons/transcript.md)
+- [Gina Gotthilf](../episodes/gina-gotthilf/transcript.md)
+- [Jerry Colonna](../episodes/jerry-colonna/transcript.md)
+- [Julia Schottenstein](../episodes/julia-schottenstein/transcript.md)
+- [Matt MacInnis](../episodes/matt-macinnis/transcript.md)
+- [Merci Grace](../episodes/merci-grace/transcript.md)
+- [Mike Maples Jr](../episodes/mike-maples-jr/transcript.md)
+- [Naomi Ionita](../episodes/naomi-ionita/transcript.md)
+- [Raaz Herzberg](../episodes/raaz-herzberg/transcript.md)
+- [Ryan Hoover](../episodes/ryan-hoover/transcript.md)
+- [Sarah Tavel](../episodes/sarah-tavel/transcript.md)
+- [Todd Jackson](../episodes/todd-jackson/transcript.md)
+- [Tom Conrad](../episodes/tom-conrad/transcript.md)
+- [Uri Levine](../episodes/uri-levine/transcript.md)
+- [Geoffrey Moore](../episodes/geoffrey-moore/transcript.md)
+- [Gustaf Alstromer](../episodes/gustaf-alstromer/transcript.md)
+- [Madhavan Ramanujam](../episodes/madhavan-ramanujam/transcript.md)

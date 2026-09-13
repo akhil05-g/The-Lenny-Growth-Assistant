@@ -1,0 +1,28 @@
+# startup growth
+
+Episodes discussing **startup growth**:
+
+- [Anton Osika](../episodes/anton-osika/transcript.md)
+- [Eric Simons](../episodes/eric-simons/transcript.md)
+- [Grant Lee](../episodes/grant-lee/transcript.md)
+- [Heidi Helfand](../episodes/heidi-helfand/transcript.md)
+- [Julian Shapiro](../episodes/julian-shapiro/transcript.md)
+- [Kevin Aluwi](../episodes/kevin-aluwi/transcript.md)
+- [Krithika Shankarraman](../episodes/krithika-shankarraman/transcript.md)
+- [Merci Grace](../episodes/merci-grace/transcript.md)
+- [Sarah Tavel](../episodes/sarah-tavel/transcript.md)
+- [Zoelle Egner](../episodes/zoelle-egner/transcript.md)
+- [Alexander Embiricos](../episodes/alexander-embiricos/transcript.md)
+- [Brendan Foody](../episodes/brendan-foody/transcript.md)
+- [Brian Balfour](../episodes/brian-balfour/transcript.md)
+- [Crystal W](../episodes/crystal-w/transcript.md)
+- [Emilie Gerber](../episodes/emilie-gerber/transcript.md)
+- [Emily Kramer](../episodes/emily-kramer/transcript.md)
+- [Geoff Charles](../episodes/geoff-charles/transcript.md)
+- [Ivan Zhao](../episodes/ivan-zhao/transcript.md)
+- [Jason Droege](../episodes/jason-droege/transcript.md)
+- [Jiaona Zhang](../episodes/jiaona-zhang/transcript.md)
+- [Lulu Cheng Meservey](../episodes/lulu-cheng-meservey/transcript.md)
+- [Pete Kazanjy](../episodes/pete-kazanjy/transcript.md)
+- [Scott Wu](../episodes/scott-wu/transcript.md)
+- [Sean Ellis](../episodes/sean-ellis/transcript.md)

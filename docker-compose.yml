@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Database Service (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: lenny_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: lenny_growth
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend API Service (FastAPI)
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: lenny_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - PORT=8000
+      - DATABASE_URL=postgresql+asyncpg://postgres:password123@db:5432/lenny_growth
+      - ACTIVE_PROVIDER=ollama
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=llama3.2:latest
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - TRANSCRIPTS_DATA_DIR=data/episodes
+      - INDEX_DATA_DIR=data/index
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Frontend Web App Service (React + Nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: lenny_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

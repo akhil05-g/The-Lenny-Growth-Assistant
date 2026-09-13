@@ -1,0 +1,23 @@
+# hiring
+
+Episodes discussing **hiring**:
+
+- [Bill Carr](../episodes/bill-carr/transcript.md)
+- [Gokul Rajaram](../episodes/gokul-rajaram/transcript.md)
+- [Interview Q Compilation](../episodes/interview-q-compilation/transcript.md)
+- [Jason Shah](../episodes/jason-shah/transcript.md)
+- [Jess Lachs](../episodes/jess-lachs/transcript.md)
+- [Jonathan Lowenhar](../episodes/jonathan-lowenhar/transcript.md)
+- [Kevin Yien](../episodes/kevin-yien/transcript.md)
+- [Luc Levesque](../episodes/luc-levesque/transcript.md)
+- [Melissa Tan](../episodes/melissa-tan/transcript.md)
+- [Merci Grace](../episodes/merci-grace/transcript.md)
+- [Sanchan Saxena](../episodes/sanchan-saxena/transcript.md)
+- [Sri Batchu](../episodes/sri-batchu/transcript.md)
+- [Brendan Foody](../episodes/brendan-foody/transcript.md)
+- [Emily Kramer](../episodes/emily-kramer/transcript.md)
+- [Keith Yandell](../episodes/keith-yandell/transcript.md)
+- [Lauren Ipsen](../episodes/lauren-ipsen/transcript.md)
+- [Nabeel S. Qureshi](../episodes/nabeel-s-qureshi/transcript.md)
+- [Pete Kazanjy](../episodes/pete-kazanjy/transcript.md)
+- [Phyl Terry](../episodes/phyl-terry/transcript.md)

@@ -1,0 +1,25 @@
+# decision making
+
+Episodes discussing **decision making**:
+
+- [Ada Chen Rekhi](../episodes/ada-chen-rekhi/transcript.md)
+- [Anneka Gupta](../episodes/anneka-gupta/transcript.md)
+- [Ben Horowitz](../episodes/ben-horowitz/transcript.md)
+- [Brandon Chu](../episodes/brandon-chu/transcript.md)
+- [Joe Hudson](../episodes/joe-hudson/transcript.md)
+- [John Cutler](../episodes/john-cutler/transcript.md)
+- [Lane Shackleton](../episodes/lane-shackleton/transcript.md)
+- [Tobi Lutke](../episodes/tobi-lutke/transcript.md)
+- [David Placek](../episodes/david-placek/transcript.md)
+- [Evan LaPointe](../episodes/evan-lapointe/transcript.md)
+- [Geoff Charles](../episodes/geoff-charles/transcript.md)
+- [Lulu Cheng Meservey](../episodes/lulu-cheng-meservey/transcript.md)
+- [Matt Dixon](../episodes/matt-dixon/transcript.md)
+- [Matt Mullenweg](../episodes/matt-mullenweg/transcript.md)
+- [Nicole Forsgren](../episodes/nicole-forsgren/transcript.md)
+- [Paul Millerd](../episodes/paul-millerd/transcript.md)
+- [Sahil Mansuri](../episodes/sahil-mansuri/transcript.md)
+- [Shishir Mehrotra](../episodes/shishir-mehrotra/transcript.md)
+- [Shreyas Doshi Live](../episodes/shreyas-doshi-live/transcript.md)
+- [Stewart Butterfield](../episodes/stewart-butterfield/transcript.md)
+- [Upasna Gautam](../episodes/upasna-gautam/transcript.md)

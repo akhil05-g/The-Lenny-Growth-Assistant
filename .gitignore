@@ -1,0 +1,50 @@
+# Environment variables & secrets (CRITICAL: Never commit secrets)
+.env
+*.env
+*.env.local
+*.secret
+
+# Database & SQLite files
+*.db
+*.sqlite
+*.sqlite3
+lenny_assistant.db
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js dependencies (keep dist for zero-setup evaluator serving)
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Assignment Take-Home Word Documents & Raw Screenshots
+*.docx
+*.doc
+assignment_text.txt
+Screenshot*.png
+*.tmp
+
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

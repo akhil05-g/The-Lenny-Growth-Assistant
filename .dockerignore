@@ -1,0 +1,34 @@
+# Git & IDE
+.git
+.gitignore
+.vscode
+.idea
+
+# Python caches
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+tests
+
+# Node caches
+frontend/node_modules
+frontend/dist
+
+# Submission and documentation files (keep Docker image slim)
+*.docx
+*.zip
+Screenshot *.png
+demo_video_script.md
+PRD.md
+design.md
+architecture.md
+agent_transcripts
+docs
+assignment_text.txt
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3

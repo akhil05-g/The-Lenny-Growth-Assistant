@@ -1,0 +1,26 @@
+# company culture
+
+Episodes discussing **company culture**:
+
+- [Chip Conley](../episodes/chip-conley/transcript.md)
+- [Dharmesh Shah](../episodes/dharmesh-shah/transcript.md)
+- [Eeke de Milliano](../episodes/eeke-de-milliano/transcript.md)
+- [Elizabeth Stone](../episodes/elizabeth-stone/transcript.md)
+- [Eric Ries](../episodes/eric-ries/transcript.md)
+- [Karri Saarinen](../episodes/karri-saarinen/transcript.md)
+- [Ray Cao](../episodes/ray-cao/transcript.md)
+- [Tobi Lutke](../episodes/tobi-lutke/transcript.md)
+- [Ivan Zhao](../episodes/ivan-zhao/transcript.md)
+- [Jason Feifer](../episodes/jason-feifer/transcript.md)
+- [Keith Yandell](../episodes/keith-yandell/transcript.md)
+- [Laura Modi](../episodes/laura-modi/transcript.md)
+- [Logan Kilpatrick](../episodes/logan-kilpatrick/transcript.md)
+- [Lulu Cheng Meservey](../episodes/lulu-cheng-meservey/transcript.md)
+- [Matt Mullenweg](../episodes/matt-mullenweg/transcript.md)
+- [Maya Prohovnik](../episodes/maya-prohovnik/transcript.md)
+- [Nabeel S. Qureshi](../episodes/nabeel-s-qureshi/transcript.md)
+- [Rachel Lockett](../episodes/rachel-lockett/transcript.md)
+- [Sahil Mansuri](../episodes/sahil-mansuri/transcript.md)
+- [Shishir Mehrotra](../episodes/shishir-mehrotra/transcript.md)
+- [Stewart Butterfield](../episodes/stewart-butterfield/transcript.md)
+- [Upasna Gautam](../episodes/upasna-gautam/transcript.md)
