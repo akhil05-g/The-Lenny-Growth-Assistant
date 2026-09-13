@@ -7,47 +7,47 @@
 
 ```mermaid
 graph TD
-    Client[Web Browser Client<br/>Impeccable Design System] <-->|HTTP REST & SSE| APIGateway[FastAPI Gateway<br/>CORS, Middleware, Rate Limits]
+    Client["Web Browser Client"] <-->|"HTTP REST & SSE"| APIGateway["FastAPI Gateway"]
 
-    subgraph "FastAPI Application Layer"
-        APIGateway <--> SessionRouter[/api/sessions]
-        APIGateway <--> ChatRouter[/api/chat]
-        APIGateway <--> ModelRouter[/api/models]
-        APIGateway <--> ArtifactRouter[/api/artifacts]
-        APIGateway <--> SkillRouter[/api/skills/ship30]
-        APIGateway <--> HealthRouter[/api/health]
+    subgraph FastAPI Application Layer
+        APIGateway <--> SessionRouter["/api/sessions"]
+        APIGateway <--> ChatRouter["/api/chat"]
+        APIGateway <--> ModelRouter["/api/models"]
+        APIGateway <--> ArtifactRouter["/api/artifacts"]
+        APIGateway <--> SkillRouter["/api/skills/ship30"]
+        APIGateway <--> HealthRouter["/api/health"]
 
-        ChatRouter <--> AgentOrchestrator[Agent Orchestrator Service]
-        AgentOrchestrator <--> RAGService[Hybrid RAG Engine]
-        AgentOrchestrator <--> Ship30Engine[Ship 30 for 30 Skill]
-        AgentOrchestrator <--> ArtifactParser[Artifact Extractor & Sanitizer]
-        AgentOrchestrator <--> LLMProviderLayer[Unified LLM Provider Layer]
+        ChatRouter <--> AgentOrchestrator["Agent Orchestrator"]
+        AgentOrchestrator <--> RAGService["Hybrid RAG Engine"]
+        AgentOrchestrator <--> Ship30Engine["Ship 30 for 30 Skill"]
+        AgentOrchestrator <--> ArtifactParser["Artifact Extractor"]
+        AgentOrchestrator <--> LLMProviderLayer["Unified LLM Provider Layer"]
     end
 
-    subgraph "Persistence Layer"
-        SessionRouter <--> DBManager[(Database Manager)]
+    subgraph Persistence Layer
+        SessionRouter <--> DBManager[("Database Manager")]
         ChatRouter <--> DBManager
         ArtifactRouter <--> DBManager
-        DBManager -->|Primary| Postgres[(PostgreSQL / Supabase / Railway)]
-        DBManager -.->|Automatic Failover| SQLite[(Local SQLite: lenny_assistant.db)]
+        DBManager -->|Primary| Postgres[("PostgreSQL")]
+        DBManager -.->|Failover| SQLite[("SQLite")]
     end
 
-    subgraph "Knowledge Base & Indexing"
-        RAGService <--> TopicIndices[89 Curated Topic Indices]
-        RAGService <--> BM25Ranker[BM25 Keyword Engine]
-        RAGService <--> EpisodeCorpus[303 Lenny Transcripts]
+    subgraph Knowledge Base
+        RAGService <--> TopicIndices["89 Topic Indices"]
+        RAGService <--> BM25Ranker["BM25 Keyword Engine"]
+        RAGService <--> EpisodeCorpus["303 Lenny Transcripts"]
     end
 
-    subgraph "External Model Providers"
-        LLMProviderLayer <-->|Cloud API| GroqAPI[Groq Cloud API<br/>llama-3.1-70b-versatile]
-        LLMProviderLayer <-->|Local Inference| Ollama[Ollama Local Daemon<br/>llama3.2 / mistral]
-        LLMProviderLayer <-->|Cloud API| ClaudeAPI[Anthropic Claude API<br/>claude-sonnet-4-6]
-        LLMProviderLayer <-->|Cloud API| OpenAIAPI[OpenAI API<br/>gpt-4o]
-        LLMProviderLayer -.->|Zero-Downtime Fallback| ResilientMock[Resilient Rule-Based Engine]
+    subgraph External Model Providers
+        LLMProviderLayer <-->|"Cloud API"| GroqAPI["Groq Cloud - llama-3.1-70b"]
+        LLMProviderLayer <-->|"Local"| Ollama["Ollama Local - llama3.2"]
+        LLMProviderLayer <-->|"Cloud API"| ClaudeAPI["Anthropic Claude"]
+        LLMProviderLayer <-->|"Cloud API"| OpenAIAPI["OpenAI GPT-4o"]
+        LLMProviderLayer -.->|Fallback| ResilientMock["Resilient Rule-Based"]
     end
 
-    subgraph "Client Sandboxing"
-        Client --> SandboxedIframe[Isolated Iframe<br/>sandbox='allow-scripts' + CSP]
+    subgraph Client Sandboxing
+        Client --> SandboxedIframe["Sandboxed iframe"]
     end
 ```
 

@@ -40,6 +40,7 @@ yarn-error.log*
 *.docx
 *.doc
 assignment_text.txt
+demo_video_script.md
 Screenshot*.png
 *.tmp
 
