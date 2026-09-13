@@ -290,7 +290,92 @@ class OpenAIProvider(BaseLLMProvider):
                             continue
 
 
+class GroqProvider(BaseLLMProvider):
+    """Groq Cloud provider — OpenAI-compatible API with ultra-fast inference.
+    
+    Uses llama-3.1-70b-versatile by default. Free tier available at console.groq.com.
+    """
+
+    BASE_URL = "https://api.groq.com/openai/v1"
+
+    def __init__(self, api_key: Optional[str] = None, model_name: Optional[str] = None):
+        self.api_key = api_key or settings.GROQ_API_KEY or ""
+        self.model_name = model_name or settings.GROQ_MODEL
+
+    async def check_health(self) -> Tuple[bool, float, str]:
+        if not self.api_key:
+            return False, 0.0, "Groq API key not configured (set GROQ_API_KEY in .env)"
+        start = time.perf_counter()
+        try:
+            headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                res = await client.get(f"{self.BASE_URL}/models", headers=headers)
+                latency = (time.perf_counter() - start) * 1000
+                if res.status_code == 200:
+                    return True, latency, f"Groq API ready ({self.model_name})"
+                return False, latency, f"Groq HTTP {res.status_code}: {res.text[:80]}"
+        except Exception as e:
+            latency = (time.perf_counter() - start) * 1000
+            return False, latency, f"Groq error: {type(e).__name__}: {e}"
+
+    async def generate_response(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: str,
+        temperature: float = 0.2,
+        max_tokens: int = 4000,
+    ) -> Tuple[str, float]:
+        if not self.api_key:
+            raise ValueError("GROQ_API_KEY is not configured")
+        start = time.perf_counter()
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+        payload = {
+            "model": self.model_name,
+            "messages": [{"role": "system", "content": system_prompt}] + messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            res = await client.post(f"{self.BASE_URL}/chat/completions", headers=headers, json=payload)
+            latency = (time.perf_counter() - start) * 1000
+            if res.status_code != 200:
+                raise RuntimeError(f"Groq error ({res.status_code}): {res.text}")
+            data = res.json()
+            content = data["choices"][0]["message"]["content"]
+            return content, latency
+
+    async def generate_response_stream(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: str,
+        temperature: float = 0.2,
+        max_tokens: int = 4000,
+    ) -> AsyncGenerator[str, None]:
+        if not self.api_key:
+            raise ValueError("GROQ_API_KEY is not configured")
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+        payload = {
+            "model": self.model_name,
+            "messages": [{"role": "system", "content": system_prompt}] + messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "stream": True,
+        }
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            async with client.stream("POST", f"{self.BASE_URL}/chat/completions", headers=headers, json=payload) as response:
+                async for line in response.aiter_lines():
+                    if line.startswith("data: ") and line != "data: [DONE]":
+                        try:
+                            chunk = json.loads(line[6:])
+                            delta = chunk["choices"][0].get("delta", {}).get("content", "")
+                            if delta:
+                                yield delta
+                        except Exception:
+                            continue
+
+
 class ResilientLocalProvider(BaseLLMProvider):
+
 
     """Deterministic, resilient local synthesis engine.
     
@@ -456,6 +541,7 @@ class LLMManager:
             "claude": claude_inst,
             "anthropic": claude_inst,   # alias — same instance, different key
             "openai": OpenAIProvider(),
+            "groq": GroqProvider(),
             "resilient_local": ResilientLocalProvider(),
         }
 
@@ -466,7 +552,7 @@ class LLMManager:
         # Accept both "anthropic" and "claude" spellings
         canonical = "claude" if provider_name == "anthropic" else provider_name
         if canonical not in self.providers:
-            raise ValueError(f"Unknown provider '{provider_name}'. Supported: ollama, anthropic, openai, resilient_local")
+            raise ValueError(f"Unknown provider '{provider_name}'. Supported: ollama, anthropic, openai, groq, resilient_local")
         self.active_provider_name = canonical
         if model_name:
             provider = self.providers[canonical]

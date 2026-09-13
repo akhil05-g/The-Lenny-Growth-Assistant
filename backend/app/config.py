@@ -29,8 +29,8 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./lenny_assistant.db"
 
     # LLM Settings
-    # Switch by setting ACTIVE_PROVIDER=anthropic (or ollama/openai/resilient_local) in .env
-    ACTIVE_PROVIDER: Literal["ollama", "anthropic", "claude", "openai", "resilient_local"] = "ollama"
+    # Switch by setting ACTIVE_PROVIDER=anthropic (or ollama/openai/groq/resilient_local) in .env
+    ACTIVE_PROVIDER: Literal["ollama", "anthropic", "claude", "openai", "groq", "resilient_local"] = "ollama"
 
     # Ollama Local Configuration
     OLLAMA_BASE_URL: str = "http://localhost:11434"
@@ -42,6 +42,10 @@ class Settings(BaseSettings):
 
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_MODEL: str = "gpt-4o"
+
+    # Groq Configuration (OpenAI-compatible, ultra-fast inference)
+    GROQ_API_KEY: Optional[str] = None
+    GROQ_MODEL: str = "llama-3.1-70b-versatile"
 
     # Knowledge Base settings
     TRANSCRIPTS_DATA_DIR: str = str(EPISODES_DIR)
