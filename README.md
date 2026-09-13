@@ -6,6 +6,15 @@
 🚀 **Live Deployment**: [https://the-lenny-growth-assistant-jq4i.onrender.com](https://the-lenny-growth-assistant-jq4i.onrender.com)  
 📂 **Repository**: [https://github.com/akhil05-g/The-Lenny-Growth-Assistant](https://github.com/akhil05-g/The-Lenny-Growth-Assistant)
 
+### 📋 Assignment Deliverables & Documentation Quick Links
+| Deliverable | Document Link | Description |
+| :--- | :--- | :--- |
+| **PRD** | [📄 `PRD.md`](./PRD.md) | Problem statement, user personas, engineering journey, scope decisions |
+| **Architecture** | [🏛️ `architecture.md`](./architecture.md) | Component topology, DB schema, RAG pipeline, security isolation |
+| **Design** | [🎨 `design.md`](./design.md) | UI/UX philosophy, 3-zone architecture, interaction states, accessibility |
+| **Tests & Verification** | [🧪 `tests.md`](./tests.md) | Automated suite commands, manual UI plan, Thunder Client API screenshots |
+| **Agent Transcripts** | [🤖 `agent_transcripts/`](./agent_transcripts/README.md) | Prompting logs, debugging sessions, failed attempts & corrections |
+
 ---
 
 ## 🌟 Key Features
