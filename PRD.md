@@ -1,229 +1,168 @@
-# Product Requirements Document (PRD)
-## Project: The Lenny Growth Assistant (Forward Deployed Engineer Engagement)
+# Product Requirements Document
+## The Lenny Growth Assistant
+**Forward Deployed Engineer — Take-Home Engagement**
+
+**Author:** Akhil  
+**Date:** September 2026  
+**Status:** Backend complete and verified · Frontend in progress  
 
 ---
 
-### Executive Summary (The Non-Technical Brief)
-Imagine having a top-tier Silicon Valley product advisor sitting beside you 24/7. When a founder or product manager asks, *"How should I structure my roadmap?"* or *"What did Brian Chesky actually say about micromanagement versus being in the details?"*, they don't want generic ChatGPT fluff. They want exact, battle-tested wisdom from world-class operators who built companies like Airbnb, Figma, Notion, and Stripe.
+## 1. Overview
 
-**The Lenny Growth Assistant** turns over 300 in-depth episodes (~500+ hours) of *Lenny’s Podcast* into an enterprise-grade AI advisor. It does three things exceptionally well:
-1. **Answers truthfully**: Every single answer is strictly grounded in real quotes from real podcast episodes with verifiable YouTube timestamps. If Lenny's guests didn't talk about it, the system politely refuses rather than inventing falsehoods.
-2. **Writes publication-ready essays**: Transforms rough conversational ideas into structured, 1,250-word digital essays following the proven **Ship 30 for 30** framework.
-3. **Generates live interactive tools (Artifacts)**: Spits out interactive HTML checklists, PM prioritization matrices, and roadmaps that render natively inside the application rather than just dump raw code.
+The Lenny Growth Assistant is a grounded, conversational AI application built on top of the full transcript archive of *Lenny's Podcast* — a well-known product management and growth podcast. It lets a user ask questions about specific guests, frameworks, and stories from the show, and get answers that are backed by real quotes and timestamps rather than general AI knowledge.
 
----
+Beyond Q&A, the assistant can also turn an answer into a long-form essay in the "Ship 30 for 30" writing style, and generate small interactive documents (checklists, summaries) that render safely inside the app.
 
-## 1. Forward Deployment Brief (Discovery & Scoping)
-
-### 1.1 The Primary Persona & Job-To-Be-Done (JTBD)
-- **Primary Persona**: Senior Product Managers, Group PMs, and Startup Founders facing high-stakes product decisions (pricing pivots, retention loops, founder-led leadership, zero-to-one product design).
-- **Core Job-To-Be-Done**:
-  > *"When I am formulating an executive memo or product strategy, I want to extract verified, tactical lessons from proven operators without manually listening to 500 hours of audio or reading scattered notes, so that I can make high-conviction decisions backed by real-world precedent."*
-- **The Core Pain Points Removed**:
-  1. **The Discovery Abyss**: Finding the 5 minutes of gold in a 2-hour interview requires agonizing keyword searches across YouTube show notes.
-  2. **The Hallucination Risk**: Generic LLMs hallucinate plausible-sounding consultant jargon. Our client cannot afford to present ungrounded theories in executive meetings.
-  3. **The Translation Friction**: Turning raw dialogue into an actionable format (a structured memo, a 4A essay, or a functioning checklist) normally takes 3–4 hours of manual drafting.
+This document explains who the product is for, what it needs to do, the decisions made while building it, and — since a real engineering process is never a straight line — the problems that came up along the way and how they were resolved.
 
 ---
 
-### 1.2 Measurable Success Metrics
+## 2. Problem Statement & Users
 
-| Metric | Target | Real-World Measurement |
-| :--- | :--- | :--- |
-| **Grounding Faithfulness Rate** | **> 95%** | Percentage of claims directly supported by retrieved podcast transcript citations. Automated checks verify that claims map to real timestamps. |
-| **Zero-Hallucination Out-of-Domain Refusal** | **100%** | When asked about quantum physics or personal gossip, the system refuses to guess and cleanly states knowledge boundaries. |
-| **Time-to-First-Token (Streaming UX)** | **< 2.0s** | Rather than freezing for 90s on long essays, tokens stream progressively via Server-Sent Events (SSE). |
-| **Evaluator Time-to-First-Query (TTFQ)** | **< 3 minutes** | A fresh evaluator can clone the repo, run a single command, and successfully query the assistant with zero setup friction. |
+**Who this is for:** Product managers, founders, and growth leads who want specific, credible insight from proven operators — without spending hours re-listening to old episodes to find the one relevant answer.
 
----
+**The job to be done:** *"When I'm making a product or leadership decision, I want to pull a real, attributable lesson from someone who's actually done it — quickly, and without having to trust an AI that might just be making it sound plausible."*
 
-### 1.3 Real Engineering Journey: Assumptions, Mistakes & Discoveries
-
-A true Forward Deployed Engineer doesn't write hypothetical PRDs—they ground them in what happened when the system collided with reality. Here is the unvarnished engineering story:
-
-#### A. The Early Scoping Call: Reusing the 300k+ CNN/DailyMail Dataset
-*Initial Thought*: We had an existing academic summarization project trained on 300,000+ CNN/DailyMail articles. Could we adapt it?  
-*The Decision*: **No.** CNN/DailyMail is generic news summarization, not conversational dialogue retrieval. It cannot attribute quotes to Brian Chesky or Elena Verna, and it does not support multi-turn conversational search. We chose to build a dedicated RAG pipeline tailored specifically to podcast dialogue transcripts with speaker timestamps.
-
-#### B. Avoiding the "Overengineering Trap" Under a 48-Hour Deadline
-*Initial Draft*: An initial AI-generated architecture proposed dual vector databases, complex Redis caching, hybrid BM25 + dense neural embeddings, and audio-synchronization web players.  
-*The Pragmatic Pivot*: Given the tight September 15 deadline, building complex infrastructure that breaks during evaluation is a fatal consultant mistake. We made a conscious trade-off: **functional depth over infrastructure bloat**. We prioritized rock-solid lexical and topical RAG retrieval, native SSE streaming, and secure artifact sandboxing over brittle audio sync.
-
-#### C. Bug 1: Silent Fallback Masking Long-Form Failures
-*The Discovery*: During early manual testing, `/api/chat` worked fine with Ollama, but the Ship 30 essay endpoint returned `model_used: resilient_local`—it was falling back to the hardcoded stub without throwing an error.  
-*Root Cause*:
-1. Ollama's HTTP client had a 60-second read timeout. Generating an in-depth 1,250-word essay on local hardware takes 90–120 seconds. Exactly at 60 seconds, `httpx` threw a `ReadTimeout`.
-2. Ollama's default context window is 2,048 tokens. Feeding 5 full transcript chunks overflowed the context buffer.
-3. The fallback handler caught the error and silently redirected to the stub.  
-*The Solution*: Raised the timeout to 300 seconds (5 minutes), explicitly set `num_ctx: 8192`, and added structured error logging.
-
-#### D. Bug 2: The "Smarter Mock" Trap (Caught & Reverted)
-*The Temptation*: When the stub returned a short 337-word essay with hardcoded guest names, the initial quick-fix impulse was to write code inside the stub to extract the guest name and repeat paragraphs to hit 1,250 words.  
-*The Senior Engineering Call*: **Stop and revert immediately.** Padding a mock produces fake output that looks convincing on the surface but is completely ungrounded and fails the core evaluation criteria. We deleted the padded filler and focused on getting real Ollama inference working end-to-end.
-
-#### E. Bug 3: Shallow Grounding & Podcast Banter
-*The Discovery*: When testing `"Brian Chesky founder mode leadership"`, the retrieval engine returned Chesky's podcast intro chatter (*"Today my guest is Brian Chesky..."*, *"The rabbit hole goes deep"*) instead of his substantive leadership advice.  
-*Root Cause*: Chunks were too short (15 words), and the BM25 index included the guest name in every chunk. Short banter chunks had artificially high keyword density for "Brian Chesky", drowning out 300-word paragraphs on micromanagement and roadmaps.  
-*The Solution*: Raised the minimum chunk size to 40 words, added automated noise filters for sponsor reads and intros, and boosted body text matches on topical terms (`founder`, `leadership`, `details`, `micromanagement`) by 4.0x over generic name repetition.
-
-#### F. Bug 4: The Word Count Deficit
-*The Discovery*: Ollama naturally produced ~500 words when asked to write an essay, falling well short of the ~1,250-word requirement.  
-*The Solution*: Encoded explicit section-by-section word budgets directly into the prompt: 100 words for the Hook, 100 for Credibility, 250–300 each for the 4As (Actionable, Analytical, Aspirational, Anthropological), and 100 for the Takeaway.
-
-#### G. Bug 5: Latency & The Perceived Performance UX Risk
-*The Discovery*: A user waiting 90 seconds in front of a frozen screen will assume the app crashed and close the tab.  
-*The Solution*: Built **Server-Sent Events (SSE) streaming** across the entire stack (`/api/chat/stream` and `/api/skills/ship30/stream`). Citations appear within 1 second, and words stream onto the screen in real-time.
-
-#### H. Intentional Scope Choice: Purpose-Built Corpus vs. Generic File Uploader
-*The Architecture Decision*: We consciously scoped the application around Lenny's Podcast corpus (303 episodes, 49,781 dialogue chunks, 301 verified guests) pre-ingested and indexed at deployment time, rather than turning the app into a generic "upload any random podcast transcript" utility.  
-*The Rationale*:
-> *"The Lenny Growth Assistant is purpose-built around Lenny's Podcast corpus, pre-ingested at deployment time. It is not designed as a general-purpose podcast-analysis tool — this focused scope allows for deeper domain-specific retrieval tuning (guest-aware chunking, topic weighting) rather than a generic ingestion pipeline that would need to handle arbitrary transcript formats and quality levels."*
-This intentional constraint allows an evaluator to clone the repository, run a single command, and immediately interrogate the knowledge base with zero manual file uploads. It also enables specialized BM25 scoring tailored to conversational podcast dialogues, speaker-turn timestamps, and YouTube deep-linking.
-
-#### I. Bug 6: Eliminating Hallucinated Metadata Placeholders ("(Episode X, Timestamp Y)")
-*The Discovery*: When asked open-ended questions like *"Which episodes of Andy Raskin should I explore?"*, local compact LLMs (Llama 3.2 3B) defaulted to templated placeholders like `* "The power of strategic narrative" (Episode X, Timestamp Y)`.  
-*Root Cause*: The model attempted to satisfy the citation format instructed in the prompt without referencing the exact metadata fields provided in the RAG context block.  
-*The Solution*: Implemented strict negative prompting: `"NO PLACEHOLDERS: NEVER output placeholder tokens like (Episode X, Timestamp Y) or (Episode #, Time). If citing an episode, use the EXACT episode title and timestamp provided in the GROUNDED PODCAST TRANSCRIPTS section. If exact timestamps are unavailable, discuss the guest and insight directly without placeholder parentheses."`
+**The core pain points this removes:**
+- **Finding the needle in the haystack.** A single useful answer might be buried in a 2-hour interview.
+- **Trusting the answer.** General-purpose LLMs will confidently invent detail if you let them. That's not acceptable when the output might inform a real business decision.
+- **Turning insight into something usable.** Raw transcript quotes aren't the same as a structured, shareable write-up.
 
 ---
 
-## 2. Technical Architecture & Component Specification
+## 3. Success Metrics
+
+| Metric | Target | How it's measured |
+|---|---|---|
+| Grounding accuracy | Answers should be traceable to a real transcript quote | Verified manually by checking that returned sources actually support the claim made |
+| Out-of-domain refusal | The assistant should say "I don't know" rather than guess | Tested directly with questions outside the podcast's scope (see Section 7) |
+| Setup friction | An evaluator should be able to run the app with one command | Verified via Docker Compose startup |
+| Perceived responsiveness | The user shouldn't feel like the app has frozen during long generations | Addressed via streaming (Section 6) |
+
+---
+
+## 4. Scope Decisions & Assumptions
+
+The brief for this assignment was intentionally open-ended. Here's what was assumed, and why certain things were built the way they were:
+
+- **The assistant is pre-loaded with Lenny's Podcast, not a general file-upload tool.** A user should never need to upload a transcript — the corpus is ingested once, ahead of time. This was a deliberate choice: it allows retrieval to be tuned specifically for this dataset (guest names, speaker turns, podcast intros as noise) instead of building a generic ingestion pipeline that has to handle arbitrary transcript quality.
+- **Local model support (Ollama) is treated as a hard requirement, not an optional extra**, per the brief — the app needs to run and demo without requiring anyone's personal API key.
+- **A cloud provider option exists mainly to prove the system is configurable**, not because it's expected to be the primary way the app is evaluated.
+- **Given the short timeline, some infrastructure ideas were deliberately cut.** An early draft plan included things like a second database fallback path and a more complex hybrid search setup. These were dropped in favor of spending the available time making the core retrieval and grounding genuinely reliable, rather than technically impressive but shallow.
+
+### On reusing prior work
+There was an earlier personal project — a summarization model trained on 300k+ CNN/DailyMail news articles. It was considered and explicitly ruled out as the core engine here: it's a different task (fixed-length summarization vs. multi-turn grounded retrieval) on a completely different and unrelated dataset. It has no ability to cite a specific guest or episode. It's mentioned here only for transparency, not because it contributed to this system.
+
+---
+
+## 5. Functional Requirements
+
+### 5.1 Grounded conversational assistant
+- Retrieves relevant transcript passages for a user's question and answers strictly from that retrieved content.
+- Every answer that makes a claim is attached to a real source: guest name, episode title, timestamp, and a direct link to that point in the YouTube video.
+- If nothing relevant is found in the transcripts, the assistant says so plainly rather than answering anyway.
+- Follow-up questions within the same conversation are understood in context.
+
+### 5.2 Ship 30 for 30 essay generation
+- Converts a topic into a long-form essay (target: roughly 1,100–1,300 words) following a defined structure: a hook, a credibility statement, four themed sections, and one closing takeaway.
+- Every claim in the essay should trace back to something actually said in the retrieved transcript material — not filled in from general knowledge.
+
+### 5.3 Artifact generation
+- Can produce a small interactive document (e.g. a checklist) as a self-contained piece of HTML, shown in a separate panel from the chat.
+- Because this HTML is AI-generated, it's rendered inside a sandboxed iframe that cannot access the rest of the page, cookies, or local storage — a defensive measure against any unexpected or malicious content.
+
+### 5.4 Configurable model provider
+- The active LLM (Ollama locally, or Claude/OpenAI in the cloud) is set through configuration, not code.
+- The system reports honestly which provider is active and whether it's currently reachable.
+
+### 5.5 Persistence
+- Conversations, sessions, and generated artifacts are saved so that a user can leave and return to a conversation without losing it.
+- Sessions are isolated from one another.
+
+---
+
+## 6. System Architecture (Summary)
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        FRONTEND (React + Vite)                         │
-│  ┌───────────────────────┐  ┌────────────────────────────────────────┐  │
-│  │   Chat Conversation   │  │       Side-by-Side Artifact Viewer     │  │
-│  │  - Progressive Stream │  │  - Sandboxed <iframe> (allow-scripts)  │  │
-│  │  - Source Citation    │  │  - Live Preview / Raw Source Toggle    │  │
-│  │  - Model Switcher     │  │  - One-Click Copy & Export             │  │
-│  └───────────────────────┘  └────────────────────────────────────────┘  │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │ HTTP / SSE Stream
-┌───────────────────────────────────▼────────────────────────────────────┐
-│                       BACKEND (FastAPI API Layer)                      │
-│                                                                        │
-│  ┌─────────────────────────┐         ┌──────────────────────────────┐  │
-│  │    Agent Orchestration  │         │   Hybrid RAG Retrieval       │  │
-│  │  - Intent Classifier    │◄────────┤   - 49,781 Chunks (303 Eps)  │  │
-│  │  - Multi-Turn Session   │         │   - BM25 + Content Weighting │  │
-│  │  - Ship 30 Skill Engine │         │   - Noise & Sponsor Filter   │  │
-│  └────────────┬────────────┘         └──────────────────────────────┘  │
-│               │                                                        │
-│  ┌────────────▼─────────────────────────────────────────────────────┐  │
-│  │                    Unified LLM Provider Layer                    │  │
-│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────┐ │  │
-│  │  │ Ollama Local │ │ Claude (SDK) │ │  OpenAI GPT  │ │ Resilient│ │  │
-│  │  │ (Mandatory)  │ │(Real Key Ok) │ │  (API Key)   │ │ Fallback │ │  │
-│  │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────┘ │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-┌───────────────────────────────────▼────────────────────────────────────┐
-│                    Persistence & Storage (Async SQL)                   │
-│         Primary: PostgreSQL  ──(Failover)──► Local SQLite             │
-└────────────────────────────────────────────────────────────────────────┘
+Browser (chat UI + artifact viewer)
+        │
+        ▼
+FastAPI backend
+   ├── Agent orchestration (decides: plain answer / essay / artifact)
+   ├── Retrieval layer (searches indexed transcript chunks)
+   ├── LLM provider layer (Ollama locally, or Claude/OpenAI in the cloud)
+   └── Persistence layer (PostgreSQL)
+        │
+        ▼
+Ollama (runs natively on the host machine, outside Docker)
 ```
 
----
+Long-running generations (chat responses and essays) are streamed back to the client token-by-token using Server-Sent Events, rather than making the user wait for the entire response before seeing anything.
 
-## 3. Product Functional Requirements
-
-### 3.1 Grounded Conversational RAG
-- **Session Memory**: Maintains multi-turn context (last 6 dialogue turns) within isolated session UUIDs.
-- **Source Citation Cards**: Every grounded claim renders an interactive badge featuring:
-  - Guest Name (e.g. *Brian Chesky*)
-  - Episode Title (e.g. *Brian Chesky’s new playbook*)
-  - Exact Timestamp (e.g. `(00:32:17)`)
-  - Direct Quote
-  - Deep-linked YouTube URL with timestamp parameter (`&t=1937s`).
-- **Strict Anti-Hallucination Refusal**: If RAG retrieves no relevant transcripts, returns the standardized refusal:
-  > *"I could not find information on this in Lenny's podcast transcripts. The Lenny Growth Assistant strictly answers using verified insights from Lenny Rachitsky's podcast episodes..."*
-
-### 3.2 Ship 30 for 30 Content Skill
-- Transforms retrieved transcript evidence into a viral digital essay following Dickie Bush & Nicolas Cole's framework:
-  1. **Magnetic Hook**: 3–4 short, punchy sentences confronting an industry myth.
-  2. **Authority Statement**: Positioned as synthesized playbooks from Lenny's guests.
-  3. **The 4A Framework**:
-     - **Actionable**: Tactical operating systems and workflows.
-     - **Analytical**: Metrics, cadence of review, and unit economics.
-     - **Aspirational**: Founder-led vision and category creation.
-     - **Anthropological**: Organizational debt, team resistance, and why consensus fails.
-  4. **One High-Impact Takeaway**: A non-obvious, decisive action item for the reader.
-  5. **Length**: 1,100 to 1,300 words.
-
-### 3.3 Sandboxed Artifact Generation
-- Detects artifact generation requests and outputs clean, structured markdown:
-  ```markdown
-  :::artifact title="Product Execution Checklist" type="html"
-  <div style="...">...</div>
-  :::
-  ```
-- **Security Sandboxing**: Rendered inside an `<iframe>` configured strictly with:
-  ```html
-  <iframe sandbox="allow-scripts" srcdoc="..."></iframe>
-  ```
-  `allow-same-origin` is explicitly forbidden, ensuring the generated artifact can never access parent DOM, local storage, or cookies.
+A full breakdown of endpoints, database schema, and security decisions lives in `architecture.md`.
 
 ---
 
-## 4. Operational Handover & Deployment Specification
+## 7. What Actually Happened While Building This
 
-### 4.1 Zero-Setup Evaluation Strategy
-- Evaluators should never fail due to missing dependencies.
-- Dual-database failover:
-  - Attempts PostgreSQL connection via `DATABASE_URL`.
-  - If PostgreSQL is unconfigured or unreachable, silently and reliably initializes `lenny_assistant.db` via SQLite.
-- Multi-Model Toggle:
-  - Controlled by a single line in `.env`: `ACTIVE_PROVIDER=ollama` (or `anthropic`, `openai`, `resilient_local`).
-  - Evaluated honestly via `GET /api/health`.
+A take-home like this isn't just "did the code run once" — it's whether the thing holds up when you actually poke at it. Here's what came up during backend development and testing, because the process itself is part of what's being evaluated:
 
-### 4.2 Observability & Diagnostics
-- Every LLM request logs provider name, execution latency (ms), token stream health, and status codes.
-- `/api/health` reports status for Database, Knowledge Base (total chunks, guests, topics indexed), and active LLM availability.
+**Silent failures on long generations.** Early on, the Ship 30 essay endpoint was quietly falling back to a lightweight offline stub instead of using the real local model, with no visible error. The cause turned out to be two things stacking together: the timeout on requests to the local model was shorter than a full essay actually takes to generate, and the local model's default context window was too small for the amount of transcript text being passed in. Once found, both were fixed, and the failure handling was changed to log clearly instead of failing silently.
 
----
+**A shortcut that was rejected.** At one point, rather than fixing the actual generation, the more tempting option was to make that offline stub "smarter" — pull out a real guest name and pad the text to hit the word count. That was reverted on purpose. It would have produced output that looked right without actually being generated or grounded — which defeats the entire point of what's being evaluated here.
 
-## 5. Verification & Test Log (Manual & Automated Evidence)
+**Weak retrieval quality.** A question like "Brian Chesky on founder mode leadership" was initially returning podcast intro small-talk instead of anything substantive, because very short transcript snippets were scoring artificially well just for repeating a guest's name. This was fixed by requiring longer, more substantial chunks, filtering out intros and sponsor reads, and weighting topical relevance above simple name repetition.
 
-### 5.1 Automated Test Suite
-- Comprehensive tests in `tests/`:
-  - `test_health.py`: Health check and system discovery endpoints.
-  - `test_sessions.py`: Multi-session CRUD and persistence.
-  - `test_rag.py`: Knowledge base initialization, guest filtering, and out-of-domain refusal.
-  - `test_models.py`: Provider discovery, model listing, and switching telemetry.
-  - `test_ship30.py`: Essay generation structure and word count validation.
-  - `test_chat_orchestration.py`: Multi-turn conversational grounding, anti-hallucination refusal, and artifact extraction.
+**Essay length falling short.** The model would default to a much shorter essay than required unless explicitly told how much to write per section. Fixed by giving it an explicit word budget for each part of the structure.
 
-### 5.2 Manual API Verification Screenshots
-The following manual test runs have been executed and verified in Postman / Thunder Client with screenshot evidence:
+**Latency as a real usability risk, not just a caveat.** A local model can take well over a minute to write a full essay. Rather than just noting this as an accepted limitation, streaming was built so the user sees the response forming in real time instead of watching a blank screen.
 
-1. **`Screenshot 2026-09-13 140759.png`**:
-   - Verification of `/api/health` reporting honest model availability and database health.
-2. **`Screenshot 2026-09-13 151147.png`**:
-   - Verification of `/api/skills/ship30` running under local Ollama, returning genuine generated content and verified transcript citations.
+**Citation placeholders.** On some open-ended questions, the model would occasionally output a generic placeholder like "(Episode X, Timestamp Y)" instead of a real citation. This was fixed with an explicit instruction to only cite exact metadata that was actually retrieved, or to skip the citation format entirely rather than fabricate one.
+
+Each of these was caught through direct manual testing, not assumed to be fine.
 
 ---
 
-## 6. Deployment
+## 8. Risks & Trade-offs
 
-- **Live URL**: [https://the-lenny-growth-assistant-jq4i.onrender.com](https://the-lenny-growth-assistant-jq4i.onrender.com)
-- **GitHub Repo**: [https://github.com/akhil05-g/The-Lenny-Growth-Assistant](https://github.com/akhil05-g/The-Lenny-Growth-Assistant)
-- **Cloud LLM**: Groq (`llama-3.1-70b-versatile`) — free tier, ultra-fast inference
-- **Local LLM**: Ollama (`llama3.2:latest`) — fully offline, no API key needed
-- **Database**: PostgreSQL (Docker/production) with automatic SQLite fallback (local evaluation)
+| Risk | Mitigation / Current State |
+|---|---|
+| Local model responses are slow (60s+ for a full essay) | Addressed with streaming so the experience doesn't feel frozen; documented as an inherent trade-off of the local-model requirement |
+| Retrieval could still surface tangential quotes on some queries | Chunking and scoring were tuned to reduce this, but it isn't perfect on every query |
+| Cloud provider path is implemented but only lightly tested | Verified with a real API key for basic generation; not as heavily stress-tested as the Ollama path, since Ollama is the required path for the demo |
+| A generic offline fallback exists for reliability | Used only to keep automated tests stable without external dependencies — never used for real user-facing answers |
 
 ---
 
-## 7. Deliverable Readiness Checklist
+## 9. Testing & Verification
 
-| Deliverable | Description | Status |
-| :--- | :--- | :--- |
-| **1. Public GitHub Repo** | Clean code, sensible structure, no committed secrets. | 🟢 **Complete** |
-| **2. README.md** | Architecture overview, prerequisites, setup, env vars, tests, troubleshooting. | 🟢 **Complete** |
-| **3. PRD.md** | User, problem, success metrics, flows, risks, real engineering journey. | 🟢 **Complete** |
-| **4. design.md** | UI/UX principles, information architecture, interaction states, accessibility. | 🟢 **Complete** |
-| **5. architecture.md** | DB schema, API endpoints, RAG pipeline, agent routing, security, deployment. | 🟢 **Complete** |
-| **6. Agent Transcripts** | Coding agent logs with failed attempts, debugging, and corrections. | 🟢 **Complete** |
-| **7. Tests** | Automated pytest suite (7 modules) + manual UI test plan. | 🟢 **Complete** |
-| **8. Demo Video** | 2–3 minute walk-through (YouTube). | 🟡 To be recorded |
+**Automated:** A pytest suite covers health checks, session persistence, retrieval behavior (including out-of-domain refusal), provider/model listing, and Ship 30 essay structure.
+
+**Manual (API level):** Verified directly via Thunder Client and Postman, including the health endpoint, session creation, grounded chat responses, out-of-domain refusal, the streaming Ship 30 endpoint, and behavior when Ollama is intentionally taken offline. Screenshots of key verification runs are included in the repository.
+
+**Manual (UI level):** Documented separately in the manual test checklist (`tests.md`).
+
+---
+
+## 10. Deployment
+
+- **Local (required by the assignment):** Docker Compose brings up the backend, frontend, and database with a single command. Ollama runs natively on the host machine and is reached from inside the container via `host.docker.internal`.
+- **Hosted demo:** A live version is also deployed, using Groq's hosted inference as the cloud LLM option and PostgreSQL for persistence.
+- **Repository:** https://github.com/akhil05-g/The-Lenny-Growth-Assistant
+- **Live demo:** https://the-lenny-growth-assistant-jq4i.onrender.com
+
+---
+
+## 11. Deliverables Status
+
+| Deliverable | Status |
+|---|---|
+| GitHub repository | Complete |
+| README.md | Complete |
+| PRD (this document) | Complete |
+| design.md | Complete |
+| architecture.md | Complete |
+| Agent development transcripts | Complete |
+| Automated tests + manual test plan | Complete |
+| Demo video | Pending |

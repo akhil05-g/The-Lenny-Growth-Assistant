@@ -74,8 +74,6 @@ Expected: All 7 test modules pass.
 
 ---
 
----
-
 ## Smoke Test for Deployed Version
 
 Replace `127.0.0.1:8000` with `https://the-lenny-growth-assistant-jq4i.onrender.com` and repeat tests 1–8.
@@ -90,9 +88,8 @@ Real-world API testing and diagnostics were conducted using Thunder Client to ve
 
 ### 1. `/api/health` Diagnostic & Knowledge Base Verification
 Verifies database health, knowledge base initialization across 49,781 chunks (301 guests, 88 topic maps), and honest reporting of Ollama connectivity.
-![Thunder Client Health Check - Knowledge Base & Diagnostics](./screenshots/health_endpoint_ollama.png)
+![Thunder Client Health Check - Knowledge Base & Diagnostics](tests/screenshots/health_endpoint_ollama.png)
 
 ### 2. Runtime Model Provider Telemetry & Diagnostics
 Verifies real-time latency reporting, authentication, and graceful provider handling when inspecting `/api/health` across different providers.
-![Thunder Client Health Check - Provider Telemetry](./screenshots/health_endpoint_claude.png)
-
+![Thunder Client Health Check - Provider Telemetry](tests/screenshots/health_endpoint_claude.png)

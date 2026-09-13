@@ -227,6 +227,7 @@ python -m pytest tests/ -v
 ├── data/
 │   └── episodes/              # 303 Lenny transcript .txt files
 ├── tests/                     # Automated pytest test suite
+├── tests.md                   # Manual UI test plan + Thunder Client verification screenshots
 ├── agent_transcripts/         # Coding agent logs & debug sessions
 ├── run.py                     # Single-command launcher
 ├── start.bat                  # Windows one-click launcher
@@ -259,4 +260,6 @@ python -m pytest tests/ -v
 | [`PRD.md`](./PRD.md) | Product requirements, user personas, success metrics, real engineering journey |
 | [`architecture.md`](./architecture.md) | DB schema, API endpoints, RAG pipeline, agent routing, security model |
 | [`design.md`](./design.md) | UI/UX principles, information architecture, interaction states, accessibility |
+| [`tests.md`](./tests.md) | Manual UI test plan + Thunder Client API verification screenshots |
 | [`agent_transcripts/`](./agent_transcripts/) | AI coding session logs including failed attempts and corrections |
+
