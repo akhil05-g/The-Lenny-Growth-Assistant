@@ -1,71 +1,107 @@
 # The Lenny Growth Assistant
 
-> **An enterprise-grade conversational AI assistant strictly grounded in 300+ episodes of Lenny’s Podcast.**  
+> **An enterprise-grade conversational AI assistant strictly grounded in 300+ episodes of Lenny's Podcast.**  
 > *Built for Senior PMs, Growth Executives, and Founders seeking verifiable tactical wisdom from world-class operators.*
+
+🚀 **Live Deployment**: [https://the-lenny-growth-assistant-jq4i.onrender.com](https://the-lenny-growth-assistant-jq4i.onrender.com)  
+📂 **Repository**: [https://github.com/akhil05-g/The-Lenny-Growth-Assistant](https://github.com/akhil05-g/The-Lenny-Growth-Assistant)
 
 ---
 
 ## 🌟 Key Features
 
-1. **Strictly Grounded Conversational RAG**: Answers are synthesized exclusively from verified dialogue turns across 303 podcast episodes (49,781 chunks). Every claim includes direct quotes and deep-linked YouTube timestamps.
-2. **Zero-Hallucination Guardrails**: If an inquiry falls outside Lenny's podcast domain (e.g. quantum physics, personal gossip), the assistant politely refuses rather than fabricating theories.
-3. **Ship 30 for 30 Content Engine**: Automatically formats operator insights into viral, 1,250-word digital essays following Dickie Bush & Nicolas Cole's 4A framework (Actionable, Analytical, Aspirational, Anthropological).
-4. **Interactive Sandboxed Artifacts**: Renders interactive HTML/CSS checklists, PM prioritization matrices, and roadmaps in a Claude-style split screen, safely isolated via `<iframe>` sandboxing.
-5. **Real-Time Server-Sent Events (SSE) Streaming**: Progressive token-by-token streaming eliminates latency anxiety for long-form essay generation.
-6. **Multi-Model Dynamic Toggling**: Run locally on **Ollama (`llama3.2:latest`)** with zero cloud dependencies, or switch instantly to **Anthropic Claude (`claude-sonnet-4-6`)** or **OpenAI (`gpt-4o`)**.
-7. **Dual-Engine Database Resilience**: Seamlessly operates on PostgreSQL in production, with automatic fallback to local SQLite for zero-friction local grading.
+1. **Strictly Grounded Conversational RAG**: Answers synthesized exclusively from 303 podcast episodes (49,781 chunks). Every claim includes direct quotes and deep-linked YouTube timestamps.
+2. **Zero-Hallucination Guardrails**: Out-of-domain queries (quantum physics, personal gossip) return a polite refusal — never fabricated content.
+3. **Ship 30 for 30 Content Engine**: Transforms operator insights into viral ~1,250-word digital essays following Dickie Bush & Nicolas Cole's 4A framework.
+4. **Interactive Sandboxed Artifacts**: Renders interactive HTML/CSS checklists and PM matrices in a Claude-style split screen, safely isolated via `<iframe>` sandboxing.
+5. **Real-Time SSE Streaming**: Progressive token-by-token streaming — citations appear in under 1 second.
+6. **Multi-Model Dynamic Toggling**: Switch between **Groq** (cloud, free), **Ollama** (local, offline), **Anthropic Claude**, or **OpenAI** via a single `.env` line.
+7. **Dual-Engine Database Resilience**: PostgreSQL in production; automatic SQLite fallback for zero-friction local evaluation.
+8. **Persistent Chat History**: All sessions, messages, and artifacts are saved to the database and survive browser refresh.
 
 ---
 
 ## 🚀 Quickstart (One-Command Setup)
 
 ### 1. Prerequisites
-- **Python**: 3.11+ (Tested on Python 3.13)
-- **Node.js**: 18+ (Tested on Node 22)
-- **Ollama**: (Mandatory for local demo) [Download Ollama](https://ollama.com/) and pull the default model:
-  ```bash
-  ollama run llama3.2:latest
-  ```
+
+| Tool | Version | Purpose |
+| :--- | :--- | :--- |
+| **Python** | 3.11+ | Backend runtime |
+| **Node.js** | 18+ | Frontend (only needed to rebuild UI) |
+| **Ollama** *(optional)* | Latest | Local offline inference |
+
+To use **local Ollama** inference, install [Ollama](https://ollama.com/) and pull the model:
+```bash
+ollama run llama3.2:latest
+```
 
 ### 2. Environment Configuration
+
 Copy `.env.example` to create your local `.env`:
 ```bash
-cp .env.example .env
+cp .env.example .env   # Mac/Linux
+copy .env.example .env  # Windows
 ```
-Default `.env` configuration for local Ollama evaluation:
+
+Edit `.env` and set your preferred provider:
+
 ```ini
-ENVIRONMENT=development
-PORT=8000
-DATABASE_URL=sqlite+aiosqlite:///./lenny_assistant.db
-ACTIVE_PROVIDER=ollama
+# ── Provider Selection ──────────────────────────────────────────
+# Options: groq | ollama | anthropic | openai | resilient_local
+ACTIVE_PROVIDER=groq
+
+# ── Groq (Recommended for evaluators — free, fast, no GPU needed)
+GROQ_API_KEY=gsk_your_key_here
+GROQ_MODEL=llama-3.1-70b-versatile
+
+# ── Ollama (Local, fully offline)
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2:latest
-ANTHROPIC_API_KEY=
+
+# ── Anthropic Claude
+ANTHROPIC_API_KEY=sk-ant-...
 ANTHROPIC_MODEL=claude-sonnet-4-6
-OPENAI_API_KEY=
+
+# ── OpenAI
+OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o
+
+# ── Database (SQLite default, PostgreSQL for production)
+DATABASE_URL=sqlite+aiosqlite:///./lenny_assistant.db
 ```
+
+> **Get a free Groq key** (takes 60 seconds): [console.groq.com](https://console.groq.com) → API Keys → Create
 
 ### 3. Start the Application (Single Command)
-In the project root, run:
+
 ```bash
-# Windows / Mac / Linux:
 python run.py
 ```
-*Or on Windows, simply double-click `start.bat`.*
 
-- **Web Application UI**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- **API Documentation (Swagger UI)**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **Health & Observability Endpoint**: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
+*Windows users: double-click `start.bat`*
 
-### 4. Start the Frontend Web App
-In a separate terminal:
+| Endpoint | URL |
+| :--- | :--- |
+| **Web App** | http://127.0.0.1:8000 |
+| **Swagger API Docs** | http://127.0.0.1:8000/docs |
+| **Health Check** | http://127.0.0.1:8000/api/health |
+
+The React frontend is pre-compiled in `frontend/dist/` and served automatically by FastAPI — **no separate `npm start` needed**.
+
+### 4. Docker (Optional — Full Stack with PostgreSQL)
+
 ```bash
-cd frontend
-npm install
-npm run dev
+# Copy env and add your Groq key
+cp .env.example .env
+# Edit .env: set GROQ_API_KEY=gsk_...
+
+# Build and launch (PostgreSQL + Backend + Frontend)
+docker-compose up --build
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser to interact with the application.
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000/docs
 
 ---
 
@@ -74,14 +110,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to interact 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                   FRONTEND (React + Vite)                   │
-│   - Glassmorphism Pastel Canvas & 3D Iridescent Orb         │
-│   - Real-Time Token Streaming with Autoscroll               │
+│   - Glassmorphism Canvas & 3D Iridescent Hero Orb           │
+│   - Real-Time Token Streaming via SSE (autoscroll)          │
 │   - Side-by-Side Sandboxed Artifact Viewer                  │
-│   - Live Model Toggle & Status Pill                         │
+│   - Live Model Toggle Pill & Chat History Sidebar           │
 └──────────────────────────────┬──────────────────────────────┘
                                │ HTTP / SSE (/api/*)
 ┌──────────────────────────────▼──────────────────────────────┐
-│                    BACKEND (FastAPI API)                    │
+│                    BACKEND (FastAPI API)                     │
 │  ┌─────────────────────────┐   ┌─────────────────────────┐  │
 │  │    Agent Orchestrator   │   │  Hybrid RAG Engine      │  │
 │  │  - Multi-Turn Memory    │◄──┤  - 49,781 Chunks        │  │
@@ -91,70 +127,136 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to interact 
 │               │                                             │
 │  ┌────────────▼──────────────────────────────────────────┐  │
 │  │            Unified LLM Provider Layer                 │  │
-│  │  [Ollama Local] [Claude SDK] [OpenAI] [Resilient]     │  │
+│  │  [Groq Cloud] [Ollama Local] [Claude] [OpenAI]        │  │
 │  └───────────────────────────────────────────────────────┘  │
 └──────────────────────────────┬──────────────────────────────┘
                                │
 ┌──────────────────────────────▼──────────────────────────────┐
 │                  Persistence & Database                     │
 │       PostgreSQL (AsyncPG) ──(Failover)──► SQLite           │
+│   Sessions | Messages | Artifacts (survives browser refresh)│
 └─────────────────────────────────────────────────────────────┘
+```
+
+See [`architecture.md`](./architecture.md) for the full database schema, API endpoints, RAG pipeline, and deployment topology.
+
+---
+
+## ⚙️ Model Provider Switching
+
+Switch the active LLM engine via `.env` or the live `/api/models` endpoint:
+
+| Provider | `ACTIVE_PROVIDER` | Notes |
+| :--- | :--- | :--- |
+| **Groq** *(Recommended)* | `groq` | Free tier at [console.groq.com](https://console.groq.com). Uses `llama-3.1-70b-versatile`. Fast. |
+| **Ollama (Local)** | `ollama` | Fully offline. Requires `ollama run llama3.2:latest`. |
+| **Anthropic Claude** | `anthropic` | Set `ANTHROPIC_API_KEY=sk-ant-...` |
+| **OpenAI GPT-4o** | `openai` | Set `OPENAI_API_KEY=sk-...` |
+| **Resilient Fallback** | `resilient_local` | Always-on deterministic engine. Used in CI/CD. |
+
+Check live provider status:
+```bash
+curl http://127.0.0.1:8000/api/health
+# → {"provider": "groq", "is_available": true, "latency_ms": 312}
+```
+
+Switch provider at runtime (no restart needed):
+```bash
+curl -X POST http://127.0.0.1:8000/api/models/switch \
+  -H "Content-Type: application/json" \
+  -d '{"provider": "ollama"}'
 ```
 
 ---
 
 ## 🧪 Running the Test Suite
 
-The automated test suite verifies API integrity, knowledge base indexing, guest filtering, grounding guardrails, and model toggling:
-
 ```bash
-# Run all automated tests
+# Install test dependencies
+pip install -r backend/requirements.txt
+
+# Run all 7 test modules
 python -m pytest tests/ -v
 ```
 
-### Test Suite Coverage:
-- `tests/test_health.py`: Verifies system diagnostics, database connection, and knowledge base indexing.
-- `tests/test_sessions.py`: Verifies multi-turn session creation, retrieval, and message persistence.
-- `tests/test_rag.py`: Verifies transcript chunking, guest filtering (Brian Chesky), and out-of-domain refusal.
-- `tests/test_models.py`: Verifies dynamic provider discovery, telemetry, and runtime model switching.
-- `tests/test_ship30.py`: Verifies the 4A framework structure and word-count targets.
-- `tests/test_chat_orchestration.py`: Verifies grounded citations, anti-hallucination guardrails, and artifact generation.
+| Test File | Coverage |
+| :--- | :--- |
+| `test_health.py` | System diagnostics, DB connection, knowledge base indexing |
+| `test_sessions.py` | Multi-turn session CRUD, message persistence across refresh |
+| `test_rag.py` | Transcript chunking, guest filtering, out-of-domain refusal |
+| `test_models.py` | Provider discovery, telemetry, runtime model switching |
+| `test_ship30.py` | 4A framework structure, ~1,250 word count targets |
+| `test_chat_orchestration.py` | Grounded citations, anti-hallucination guardrails, artifact generation |
+| `conftest.py` | Shared async fixtures and test database setup |
+
+### Manual UI Test Plan
+
+| Test | Steps | Expected Result |
+| :--- | :--- | :--- |
+| **RAG grounding** | Ask "What does Brian Chesky say about being in the details?" | Answer with citation cards + YouTube timestamps |
+| **Out-of-domain refusal** | Ask "Explain quantum entanglement" | Polite refusal, no hallucination |
+| **Ship 30 essay** | Ask "Write a Ship 30 essay about Elena Verna and growth loops" | ~1,250-word essay with 4A structure |
+| **Artifact rendering** | Ask "Generate a product execution checklist" | Interactive HTML checklist in side panel |
+| **Chat persistence** | Chat, refresh browser, reopen session | Full message history restored |
+| **Provider toggle** | Change `ACTIVE_PROVIDER` in `.env`, restart | Health badge shows new provider |
 
 ---
 
-## ⚙️ Model Provider Switching
+## 📂 Project Structure
 
-You can switch the active LLM engine dynamically via `.env` or through the frontend UI:
-
-| Provider | Setting | Prerequisites |
-| :--- | :--- | :--- |
-| **Ollama (Local)** | `ACTIVE_PROVIDER=ollama` | Ollama running locally with `llama3.2:latest`. Free, private, offline. |
-| **Anthropic Claude** | `ACTIVE_PROVIDER=anthropic` | Set `ANTHROPIC_API_KEY=sk-ant-...`. Uses official Anthropic SDK. |
-| **OpenAI GPT-4o** | `ACTIVE_PROVIDER=openai` | Set `OPENAI_API_KEY=sk-...`. |
-| **Resilient Local** | `ACTIVE_PROVIDER=resilient_local` | Always available deterministic fallback (used for CI/CD). |
-
-Check active provider status at any time:
-```bash
-curl http://127.0.0.1:8000/api/health
+```
+.
+├── backend/
+│   ├── app/
+│   │   ├── config.py          # Settings (providers, DB, ports)
+│   │   ├── database.py        # Async SQLAlchemy (PG + SQLite)
+│   │   ├── main.py            # FastAPI app + static frontend serving
+│   │   ├── models/            # SQLAlchemy ORM models
+│   │   ├── routers/           # API route handlers
+│   │   └── services/
+│   │       ├── agent_service.py    # Orchestrator + intent router
+│   │       ├── llm_provider.py     # Groq, Ollama, Claude, OpenAI, Fallback
+│   │       ├── rag_service.py      # BM25 hybrid retrieval engine
+│   │       ├── artifact_service.py # Artifact parsing & sanitization
+│   │       └── ship30_skill.py     # Essay generation skill
+│   ├── requirements.txt
+│   └── Dockerfile
+├── frontend/
+│   ├── src/                   # React source (components, hooks, context)
+│   └── dist/                  # Pre-compiled bundle (served by FastAPI)
+├── data/
+│   └── episodes/              # 303 Lenny transcript .txt files
+├── tests/                     # Automated pytest test suite
+├── agent_transcripts/         # Coding agent logs & debug sessions
+├── run.py                     # Single-command launcher
+├── start.bat                  # Windows one-click launcher
+├── docker-compose.yml         # Full-stack Docker (PG + Backend + Frontend)
+├── .env.example               # Environment template (no secrets)
+├── README.md
+├── PRD.md
+├── design.md
+└── architecture.md
 ```
 
 ---
 
-## 🛠️ Troubleshooting & Known Issues
+## 🛠️ Troubleshooting
 
-1. **Ollama Connection Timeout**:
-   - *Symptom*: Output shows `model_used: resilient_local` instead of `ollama`.
-   - *Fix*: Generating 1,250 words on local hardware takes 60–90 seconds. We raised the client timeout to 300s. Ensure Ollama is running (`ollama list`) and your machine is not out of memory.
-2. **PostgreSQL Not Running**:
-   - *Symptom*: Warning in console: `Failed to connect to primary DB... Falling back to local SQLite.`
-   - *Fix*: This is an intended resilience feature. The app automatically creates `lenny_assistant.db` locally. No action needed!
-3. **Thunder Client / Postman "Invalid URL"**:
-   - *Fix*: Ensure the target URL is exactly `http://127.0.0.1:8000/api/chat` with no trailing spaces.
+| Issue | Symptom | Fix |
+| :--- | :--- | :--- |
+| **Groq key invalid** | Health shows `is_available: false` | Get a free key at [console.groq.com](https://console.groq.com) |
+| **Ollama timeout** | `model_used: resilient_local` instead of `ollama` | Essay generation takes 90–120s on CPU. Timeout is set to 300s. Ensure Ollama is running: `ollama list` |
+| **PostgreSQL not running** | Console: `Falling back to local SQLite` | Intended! App auto-creates `lenny_assistant.db`. No action needed. |
+| **Frontend not loading** | Browser shows JSON at `localhost:8000` | The pre-built `frontend/dist/` is missing. Run `cd frontend && npm install && npm run build` |
+| **Render cold start** | First request takes ~30s | Free tier spins down after 15min inactivity. Normal behavior. |
 
 ---
 
-## 📄 Documentation Links
-- **PRD**: [`PRD.md`](./PRD.md)
-- **Architecture**: [`architecture.md`](./architecture.md)
-- **UI/UX Design**: [`design.md`](./design.md)
-- **Assignment Brief**: [`assignment_text.txt`](./assignment_text.txt)
+## 📄 Documentation
+
+| Document | Contents |
+| :--- | :--- |
+| [`PRD.md`](./PRD.md) | Product requirements, user personas, success metrics, real engineering journey |
+| [`architecture.md`](./architecture.md) | DB schema, API endpoints, RAG pipeline, agent routing, security model |
+| [`design.md`](./design.md) | UI/UX principles, information architecture, interaction states, accessibility |
+| [`agent_transcripts/`](./agent_transcripts/) | AI coding session logs including failed attempts and corrections |

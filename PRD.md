@@ -205,15 +205,25 @@ The following manual test runs have been executed and verified in Postman / Thun
 
 ---
 
-## 6. Deliverable Readiness Checklist
+## 6. Deployment
+
+- **Live URL**: [https://the-lenny-growth-assistant-jq4i.onrender.com](https://the-lenny-growth-assistant-jq4i.onrender.com)
+- **GitHub Repo**: [https://github.com/akhil05-g/The-Lenny-Growth-Assistant](https://github.com/akhil05-g/The-Lenny-Growth-Assistant)
+- **Cloud LLM**: Groq (`llama-3.1-70b-versatile`) — free tier, ultra-fast inference
+- **Local LLM**: Ollama (`llama3.2:latest`) — fully offline, no API key needed
+- **Database**: PostgreSQL (Docker/production) with automatic SQLite fallback (local evaluation)
+
+---
+
+## 7. Deliverable Readiness Checklist
 
 | Deliverable | Description | Status |
 | :--- | :--- | :--- |
-| **1. Public GitHub Repo** | Clean code repository with no committed secrets. | 🟡 Ready for final push |
-| **2. README.md** | Complete setup guide, architecture, troubleshooting. | 🟡 Drafting next |
-| **3. PRD.md** | Complete Forward Deployment Brief with genuine engineering story. | 🟢 **Complete** |
-| **4. design.md** | UI/UX rationale, artifact split-panel layout, accessibility. | 🟡 In progress |
-| **5. architecture.md** | System diagrams, RAG pipeline, SSE streaming, security model. | 🟢 **Complete** |
-| **6. Agent Transcripts** | Sanitized prompt & coding interaction logs. | 🟡 Directory ready |
-| **7. Tests** | Automated pytest suite + manual verification plan. | 🟢 **Complete (13 tests)** |
-| **8. Demo Video** | 2–3 minute walk-through demonstrating local Ollama and trade-offs. | 🟡 Script prepared |
+| **1. Public GitHub Repo** | Clean code, sensible structure, no committed secrets. | 🟢 **Complete** |
+| **2. README.md** | Architecture overview, prerequisites, setup, env vars, tests, troubleshooting. | 🟢 **Complete** |
+| **3. PRD.md** | User, problem, success metrics, flows, risks, real engineering journey. | 🟢 **Complete** |
+| **4. design.md** | UI/UX principles, information architecture, interaction states, accessibility. | 🟢 **Complete** |
+| **5. architecture.md** | DB schema, API endpoints, RAG pipeline, agent routing, security, deployment. | 🟢 **Complete** |
+| **6. Agent Transcripts** | Coding agent logs with failed attempts, debugging, and corrections. | 🟢 **Complete** |
+| **7. Tests** | Automated pytest suite (7 modules) + manual UI test plan. | 🟢 **Complete** |
+| **8. Demo Video** | 2–3 minute walk-through (YouTube). | 🟡 To be recorded |

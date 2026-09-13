@@ -75,18 +75,14 @@ Rather than looking like a generic ChatGPT clone, the application adopts a tacti
 ## 4. Key Interaction States & Micro-Interactions
 
 ### 4.1 Empty / Discovery State (The Hero Orb)
-- **Visual Centerpiece**: A multi-layered CSS iridescent bubble with radial gradients simulating 3-point studio lighting and caustic refractions.
+- **Visual Centerpiece**: An ambient glossy wallpaper background with multi-layered iridescent lighting — soft pastel mesh gradients that establish immediate visual delight.
 - **Hover Micro-interaction**: The orb scales smoothly (`scale-104`) with an intensified ambient pink-cyan glow.
-- **Click-to-Inspire**: Clicking the orb automatically populates a high-signal founder question (*"What does Brian Chesky believe about micromanagement vs being in the details?"*) into the input field.
+- **Purpose**: Provides a premium, calming backdrop that signals "intelligent assistant" before the first conversation begins.
 
-### 4.2 Quick Prompt Pills
-- A horizontal row of rounded glass pills above the input box:
-  - `🎙️ Brian Chesky on Details`
-  - `📈 Elena Verna Growth Loops`
-  - `✍️ Ship 30 for 30 Essay`
-  - `📋 Execution Checklist`
-  - `⚡ Shreyas Doshi LNO`
-- Clicking any pill immediately submits the grounded query, reducing cognitive load for evaluators.
+### 4.2 Conversational Onboarding
+- The assistant opens with a natural, friendly greeting — no canned prompt pills or rigid instruction text.
+- Users type naturally, and the assistant responds conversationally for general chat, then seamlessly transitions to grounded podcast Q&A when a relevant topic arises.
+- This reduces cognitive friction: the evaluator doesn't need to study instructions before chatting.
 
 ### 4.3 Streaming Turn State (Zero Latency Perception)
 - When the user sends a prompt:

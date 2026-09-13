@@ -39,8 +39,9 @@ graph TD
     end
 
     subgraph "External Model Providers"
+        LLMProviderLayer <-->|Cloud API| GroqAPI[Groq Cloud API<br/>llama-3.1-70b-versatile]
         LLMProviderLayer <-->|Local Inference| Ollama[Ollama Local Daemon<br/>llama3.2 / mistral]
-        LLMProviderLayer <-->|Cloud API| ClaudeAPI[Anthropic Claude API<br/>claude-3-5-sonnet]
+        LLMProviderLayer <-->|Cloud API| ClaudeAPI[Anthropic Claude API<br/>claude-sonnet-4-6]
         LLMProviderLayer <-->|Cloud API| OpenAIAPI[OpenAI API<br/>gpt-4o]
         LLMProviderLayer -.->|Zero-Downtime Fallback| ResilientMock[Resilient Rule-Based Engine]
     end
@@ -173,8 +174,35 @@ Generated HTML/CSS is treated as **untrusted user-supplied input**. To prevent c
 ## 6. Model Flexibility & Telemetry
 
 The system provides a unified abstraction `LLMProvider`:
-- **Ollama**: Connects to `http://localhost:11434` with model choice (`llama3.2`, `mistral`, `llama3.1:8b`).
-- **Anthropic Claude**: Connects via `httpx` to Anthropic API (`claude-3-5-sonnet-20241022`).
+- **Groq** *(Active cloud provider)*: Connects to `https://api.groq.com/openai/v1` using `llama-3.1-70b-versatile`. Free tier, ultra-low latency (~200ms TTFT). Uses OpenAI-compatible REST API via raw `httpx` — no Groq SDK dependency.
+- **Ollama** *(Local inference)*: Connects to `http://localhost:11434` with model choice (`llama3.2`, `mistral`, `llama3.1:8b`). Fully offline, zero cloud dependency.
+- **Anthropic Claude**: Connects via `httpx` to Anthropic API (`claude-sonnet-4-6`).
 - **OpenAI**: Connects to OpenAI API (`gpt-4o`).
-- **Resilient Fallback**: If neither local Ollama nor cloud keys are reachable, a deterministic heuristic generator synthesizes answers directly from the retrieved transcript quotes, guaranteeing that the evaluator's automated test runs never fail.
+- **Resilient Fallback**: If neither local Ollama nor cloud keys are reachable, a deterministic heuristic generator synthesizes answers directly from the retrieved transcript quotes, guaranteeing that automated test runs never fail.
 - **Provider Status Telemetry**: `/api/health` and `/api/models` report live latency, connection health, and active model name.
+
+---
+
+## 7. Deployment Topology
+
+### Cloud Deployment (Render)
+- **Live URL**: [https://the-lenny-growth-assistant-jq4i.onrender.com](https://the-lenny-growth-assistant-jq4i.onrender.com)
+- **Runtime**: Python 3.11+ on Render Web Service
+- **Build Command**: `pip install -r backend/requirements.txt`
+- **Start Command**: `uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT`
+- **Environment Variables**: `ACTIVE_PROVIDER=groq`, `GROQ_API_KEY`, `GROQ_MODEL`
+- **Database**: SQLite (embedded) — no external DB infrastructure required
+- **Static Frontend**: Pre-built React bundle in `frontend/dist/`, served by FastAPI's `StaticFiles` mount
+
+### Docker Deployment (Local)
+```yaml
+# docker-compose.yml — 3 services
+db:       postgres:15-alpine (port 5432)
+backend:  FastAPI (port 8000, ACTIVE_PROVIDER=groq)
+frontend: nginx (port 3000, proxies to backend)
+```
+
+### Single-Command Local (Evaluator)
+```bash
+python run.py   # → uvicorn on port 8000, serves API + frontend
+```
